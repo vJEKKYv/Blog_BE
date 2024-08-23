@@ -1,4 +1,4 @@
-package Blog.Blog_Test;
+package BlogTest.Blog_Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
