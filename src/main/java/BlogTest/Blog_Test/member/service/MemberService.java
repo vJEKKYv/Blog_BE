@@ -20,16 +20,21 @@ public class MemberService {
      * 회원가입
      */
     public Long join (Member member){
-        validateDuplicateMember(member); //중복 회원 검증
-        memberRepository.save(member);
-        return member.getId();
+        boolean check = validateDuplicateMember(member); //중복 회원 검증
+        if (check){
+            memberRepository.save(member);
+            return member.getId();
+        }
+        else {
+            return (long)-1;
+        }
     }
 
-    private void validateDuplicateMember(Member member) {
-        memberRepository.findByName(member.getName())
-            .ifPresent(m -> {
-                throw  new IllegalStateException("이미 존재하는 회원입니다.");
-            });
+    private boolean validateDuplicateMember(Member member) {
+        Member memberCompare = memberRepository.findByName(member.getName());
+        if (member.getId()==memberCompare.getId())
+            return false;
+        else return true;
     }
     /*
      * 전체 회원 조회
@@ -49,18 +54,22 @@ public class MemberService {
         return member.get().getName();
     }
 
-    public Optional<Member> findByName(String name) {
+    public Member findByName(String name) {
         return memberRepository.findByName(name);
     }
 
     public void deleteByName(String name) {
-        Member member = memberRepository.findByName(name)
-                .orElseThrow(() -> new NoSuchElementException("No member found with name: " + name));
+        Member member = memberRepository.findByName(name);
+        if (member == null){
+            throw new NoSuchElementException("No member found with name: " + name);
+        }
         memberRepository.delete(member);
     }
     public Member changeName(String name, String newName) {
-        Member member = memberRepository.findByName(name)
-                .orElseThrow(() -> new NoSuchElementException("No member found with name: " + name));
+        Member member = memberRepository.findByName(name);
+        if (member == null){
+            throw new NoSuchElementException("No member found with name: " + name);
+        }
         member.setName(newName);
         return memberRepository.save(member);
     }

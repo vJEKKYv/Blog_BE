@@ -17,7 +17,20 @@ public class MemberController {
     public MemberController(MemberService memberService) { // MemberService
         this.memberService = memberService;
     }
+    /**
+    // controller 참고 예제
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestParam("name") String userName) {
+        UserEntity user = userService.login(userName);
 
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", user != null);
+        requestMap.put("message", user != null ? "로그인 성공" : "로그인 실패");
+        requestMap.put("userInfo", user);
+
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
+    }
+     **/
     @PostMapping(value = "/member/new")
     public Member create(MemberForm form) {
         Member member = new Member();
@@ -38,8 +51,12 @@ public class MemberController {
 
     @GetMapping(value = "/member/name")
     public Member findMemberByName(@RequestParam("name") String name) {
-        return memberService.findByName(name)
-                .orElseThrow(() -> new NoSuchElementException("No member found with name: " + name));
+        Member member = memberService.findByName(name);
+        if (member != null){
+            return member;
+        }else {
+            throw new NoSuchElementException("No member found with name: " + name);
+        }
     }
     @GetMapping(value = "/member/id")
     public Member findMemberById(@RequestParam("id") Long id) {
@@ -53,36 +70,4 @@ public class MemberController {
         return "Member with name " + name + " deleted successfully";
     }
 }
-/**
- @Controller
- public class MemberController {
- private final MemberService memberService;
- protected MemberService getMemberService(){
- return memberService;
- }
- @Autowired
- public MemberController(MemberService memberService) {
- this.memberService = memberService;
- }
- @GetMapping(value = "/members/new")
- public String createForm() {
- return "members/createMemberForm";
- }
-
- @PostMapping(value = "/members/new")
- public String create(MemberForm form) {
- Member member = new Member();
- member.setName(form.getName());
- System.out.println("member.getName() = " + member.getName());
- memberService.join(member);
- return "redirect:/";
- }
- @GetMapping(value = "/members")
- public String list(Model model) {
- List<Member> members = memberService.findMembers();
- model.addAttribute("members", members);
- return "members/memberList";
- }
- }
- */
 
