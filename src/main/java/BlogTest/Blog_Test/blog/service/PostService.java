@@ -4,12 +4,10 @@ import BlogTest.Blog_Test.blog.domain.Post;
 import BlogTest.Blog_Test.blog.repository.PostRepository;
 import BlogTest.Blog_Test.member.domain.Member;
 import BlogTest.Blog_Test.member.repository.MemberRepository;
-import BlogTest.Blog_Test.member.service.MemberService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class PostService {
@@ -34,10 +32,12 @@ public class PostService {
     }
     //포스트 수정
     public Post changePost(Long id, String title, String content){
-        Optional<Post> post = postRepository.findById(id);
-        if(post.isEmpty()){
-            throw new NoSuchElementException("No member found with id: " + id);
+        Post post = postRepository.findById(id).get();
+        if(post == null){
+            throw new NoSuchElementException("No post found with id: " + id);
         }
-
+        post.setTitle(title);
+        post.setContent(content);
+        return post;
     }
 }

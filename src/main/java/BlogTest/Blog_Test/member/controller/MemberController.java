@@ -32,19 +32,19 @@ public class MemberController {
     }
      **/
     @PostMapping(value = "/member/new")
-    public Member create(MemberForm form) {
+    public boolean create(MemberForm form) {
         Member member = new Member();
         member.setName(form.getName());
         System.out.println("member.getName() = " + member.getName());
-        memberService.join(member);
-        return member;
+        if(memberService.join(member)==-1)  return false;
+        else return true;
     }
     @GetMapping(value = "/member/all")
     public List<Member> list(Model model) {
         List<Member> members = memberService.findMembers();
         return members;
     }
-    @PutMapping(value = "/member/change")
+    @PutMapping(value = "/member")
     public Member changeName(@RequestParam("name") String name, @RequestParam("newName") String newName) {
         return memberService.changeName(name, newName);
     }
@@ -60,11 +60,14 @@ public class MemberController {
     }
     @GetMapping(value = "/member/id")
     public Member findMemberById(@RequestParam("id") Long id) {
-        return memberService.findOne(id)
-                .orElseThrow(() -> new NoSuchElementException("No member found with id: " + id));
+        Member member = memberService.findOne(id).get();
+        if(member == null){
+            throw new NoSuchElementException("No member found with id: " + id);
+        }
+        return member;
     }
 
-    @DeleteMapping(value = "/member/delete")
+    @DeleteMapping(value = "/member")
     public String deleteMemberByName(@RequestParam("name") String name) {
         memberService.deleteByName(name);
         return "Member with name " + name + " deleted successfully";

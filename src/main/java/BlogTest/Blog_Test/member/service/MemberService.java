@@ -32,9 +32,8 @@ public class MemberService {
 
     private boolean validateDuplicateMember(Member member) {
         Member memberCompare = memberRepository.findByName(member.getName());
-        if (member.getId()==memberCompare.getId())
-            return false;
-        else return true;
+        if (memberCompare==null)    return true;
+        else return false;
     }
     /*
      * 전체 회원 조회
