@@ -40,4 +40,7 @@ public class PostService {
         post.setContent(content);
         return post;
     }
+    public boolean deletePost(Long id){
+        return false;
+    }
 }
