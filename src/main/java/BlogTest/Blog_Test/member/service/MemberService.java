@@ -64,12 +64,15 @@ public class MemberService {
         }
         memberRepository.delete(member);
     }
-    public Member changeName(String name, String newName) {
+    public boolean changeName(String name, String newName) {
         Member member = memberRepository.findByName(name);
         if (member == null){
-            throw new NoSuchElementException("No member found with name: " + name);
+            return false;
         }
-        member.setName(newName);
-        return memberRepository.save(member);
+        else {
+            member.setName(newName);
+            memberRepository.save(member);
+            return true;
+        }
     }
 }

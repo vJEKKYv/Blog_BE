@@ -35,7 +35,7 @@ public class MemberController {
     public boolean create(MemberForm form) {
         Member member = new Member();
         member.setName(form.getName());
-        System.out.println("member.getName() = " + member.getName());
+        member.setPassword(form.getPassword());
         if(memberService.join(member)==-1)  return false;
         else return true;
     }
@@ -44,9 +44,14 @@ public class MemberController {
         List<Member> members = memberService.findMembers();
         return members;
     }
-    @PutMapping(value = "/member")
-    public Member changeName(@RequestParam("name") String name, @RequestParam("newName") String newName) {
-        return memberService.changeName(name, newName);
+    @PutMapping(value = "/member/name")
+    public void changeName(@RequestParam("name") String name, @RequestParam("newName") String newName) {
+        memberService.changeName(name, newName);
+
+    }
+    @PutMapping(value = "/member/password")
+    public boolean changePassword(){
+        return true;
     }
 
     @GetMapping(value = "/member/name")
