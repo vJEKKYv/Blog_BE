@@ -23,7 +23,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    // controller 참고 예제
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(MemberForm form) {
         Member member = memberService.login(form.getName(), form.getPassword());
@@ -38,12 +38,17 @@ public class MemberController {
 
     //회원가입
     @PostMapping(value = "/member/new")
-    public boolean create(MemberForm form) {
+    public ResponseEntity<String> create(MemberForm form) {
         Member member = new Member();
         member.setName(form.getName());
         member.setPassword(form.getPassword());
-        if(memberService.join(member)==-1)  return false;
-        else return true;
+        long id = memberService.join(member);
+        if(id == -1){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Name already exsist");
+        }
+        else {
+            return ResponseEntity.ok("id: "+ id +  "\t Join Success.");
+        }
     }
     //맴버 전체 조회
     @GetMapping(value = "/member/all")
@@ -68,7 +73,7 @@ public class MemberController {
     //맴버 id 조회
     @GetMapping(value = "/member/id")
     public Member findMemberById(@RequestParam("id") Long id) {
-        Member member = memberService.findOne(id).get();
+        Member member = memberService.findOne(id);
         if(member == null){
             throw new NoSuchElementException("No member found with id: " + id);
         }
@@ -76,9 +81,14 @@ public class MemberController {
     }
     //맴버 삭제
     @DeleteMapping(value = "/member")
-    public String deleteMemberByName(@RequestParam("name") String name) {
-        memberService.deleteByName(name);
-        return "Member with name " + name + " deleted successfully";
+    public ResponseEntity<String> deleteMemberByName(@RequestParam("name") String name) {
+        boolean check = memberService.deleteByName(name);
+        if(check){
+            return ResponseEntity.ok("Delete Success.");
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found.");
+        }
     }
     //맴버 정보 변경
     @PutMapping(value = "/member")
@@ -87,7 +97,7 @@ public class MemberController {
         if (member == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found.");
         }
-        if(findMemberByName(form.getName())!=null){
+        else if(memberService.findByName(form.getName())!=null){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Name already exsist");
         }
         member.setName(form.getName());

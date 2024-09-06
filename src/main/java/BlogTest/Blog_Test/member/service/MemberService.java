@@ -18,45 +18,36 @@ public class MemberService {
     public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
-    /*
-     * 회원가입
-     */
+    //회원가입
     public Long join (Member member){
         boolean check = validateDuplicateMember(member); //중복 회원 검증
         if (check){
             memberRepository.save(member);
             return member.getId();
-        }
-        else {
-            return (long)-1;
-        }
+        }else   return (long)-1;
     }
-
+    //중복 확인
     boolean validateDuplicateMember(Member member) {
         Member memberCompare = memberRepository.findByName(member.getName());
         if (memberCompare==null)    return true;
         else return false;
     }
-    //회원가입
+    //로그인
     public Member login(String name, String pasword){
         Member member = findByName(name);
         if (member==null)   return null;
         else if (member.getPassword().equals(pasword))   return member;
         else return null;
     }
-    /*
-     * 전체 회원 조회
-     */
+    
     public List<Member> findMembers() {
-
         return memberRepository.findAll();
     }
-    public Optional<Member> findOne(Long memberId){
-        return memberRepository.findById(memberId);
+    
+    public Member findOne(Long memberId){
+        return memberRepository.findById(memberId).get();
     }
-    /*
-     * 단일 회원 조회
-     */
+
     public Member findMember(long id) {
         Member member = memberRepository.findById(id).get();
         return member;
@@ -64,14 +55,6 @@ public class MemberService {
 
     public Member findByName(String name) {
         return memberRepository.findByName(name);
-    }
-
-    public void deleteByName(String name) {
-        Member member = memberRepository.findByName(name);
-        if (member == null){
-            throw new NoSuchElementException("No member found with name: " + name);
-        }
-        memberRepository.delete(member);
     }
     //정보 수정
     public boolean changeMemberInfo(Member member) {
@@ -84,4 +67,15 @@ public class MemberService {
             return true;
         } else return false;
     }
+
+    public boolean deleteByName(String name) {
+        Member member = memberRepository.findByName(name);
+        if (member == null){
+            return false;
+        }else {
+            memberRepository.delete(member);
+            return true;
+        }
+    }
+
 }
