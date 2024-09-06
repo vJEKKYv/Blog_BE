@@ -1,14 +1,6 @@
-package BlogTest.Blog_Test.blog.domain;
+package BlogTest.Blog_Test.blog.controller;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
-public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class PostForm {
     private Long id;
     private Long memberId;
     private String title;
@@ -17,8 +9,6 @@ public class Post {
     public String getTitle() {return title;}
     public String getContent() {return content;}
     public Long getMemberId() {return memberId;}
-    public void setMemberId(Long memberId) {this.memberId = memberId;}
     public void setTitle(String title) {this.title = title;}
     public void setContent(String content) {this.content = content;}
-
 }
