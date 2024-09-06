@@ -56,10 +56,6 @@ public class MemberController {
         List<Member> members = memberService.findMembers();
         return members;
     }
-    @PutMapping(value = "/member/password")
-    public boolean changePassword(){
-        return true;
-    }
     //맴버 이름 조회
     @GetMapping(value = "/member/name")
     public Member findMemberByName(@RequestParam("name") String name) {
