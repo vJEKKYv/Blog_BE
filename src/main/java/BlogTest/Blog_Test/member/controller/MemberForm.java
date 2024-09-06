@@ -2,8 +2,16 @@ package BlogTest.Blog_Test.member.controller;
 
 
 public class MemberForm {
+    private long id;
     private String name;
     private String password;
+
+    public long getId() {
+        return id;
+    }
+    public void setId(long id){
+        this.id = id;
+    }
     public void setName(String name) {
         this.name = name;
     }
