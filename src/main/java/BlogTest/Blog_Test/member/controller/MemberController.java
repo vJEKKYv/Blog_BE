@@ -1,6 +1,7 @@
 package BlogTest.Blog_Test.member.controller;
 
 import BlogTest.Blog_Test.member.domain.Member;
+import BlogTest.Blog_Test.member.domain.dto.SaveMemberRequestDTO;
 import BlogTest.Blog_Test.member.service.MemberService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ public class MemberController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(MemberForm form) {
-        Member member = memberService.login(form.getName(), form.getPassword());
+    public ResponseEntity<Map<String, Object>> login(SaveMemberRequestDTO memberReqDTO) {
+        Member member = memberService.login(memberReqDTO.getName(), memberReqDTO.getPassword());
 
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("success", member != null);
@@ -38,10 +39,10 @@ public class MemberController {
 
     //회원가입
     @PostMapping(value = "/member/new")
-    public ResponseEntity<String> create(MemberForm form) {
+    public ResponseEntity<String> create(SaveMemberRequestDTO memberReqDTO) {
         Member member = new Member();
-        member.setName(form.getName());
-        member.setPassword(form.getPassword());
+        member.setName(memberReqDTO.getName());
+        member.setPassword(memberReqDTO.getPassword());
         long id = memberService.join(member);
         if(id == -1){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Name already exsist");
@@ -52,10 +53,11 @@ public class MemberController {
     }
     //맴버 전체 조회
     @GetMapping(value = "/member/all")
-    public List<Member> list(Model model) {
+    public List<Member> list() {
         List<Member> members = memberService.findMembers();
         return members;
     }
+    /** 없어도 됨.
     //맴버 이름 조회
     @GetMapping(value = "/member/name")
     public Member findMemberByName(@RequestParam("name") String name) {
@@ -66,6 +68,7 @@ public class MemberController {
             throw new NoSuchElementException("No member found with name: " + name);
         }
     }
+    **/
     //맴버 id 조회
     @GetMapping(value = "/member/id")
     public Member findMemberById(@RequestParam("id") Long id) {

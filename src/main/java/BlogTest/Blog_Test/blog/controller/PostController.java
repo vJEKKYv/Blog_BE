@@ -1,6 +1,7 @@
 package BlogTest.Blog_Test.blog.controller;
 
 import BlogTest.Blog_Test.blog.domain.Post;
+import BlogTest.Blog_Test.blog.domain.dto.SavePostRequestDTO;
 import BlogTest.Blog_Test.blog.service.PostService;
 import BlogTest.Blog_Test.member.domain.Member;
 import BlogTest.Blog_Test.member.service.MemberService;
@@ -21,11 +22,11 @@ public class PostController {
     }
     //글 등록
     @PostMapping(value = "/post/new")
-    public ResponseEntity<String> Posting(PostForm form){
+    public ResponseEntity<String> Posting(SavePostRequestDTO postReqDTO){
         Post post = new Post();
-        post.setTitle(form.getTitle());
-        post.setContent(form.getContent());
-        post.setMemberId(form.getMemberId());
+        post.setTitle(postReqDTO.getTitle());
+        post.setContent(postReqDTO.getContent());
+        post.setMemberId(postReqDTO.getMemberId());
         long id = postService.create(post);
         if (id==-1){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Title already exsist");
@@ -52,16 +53,16 @@ public class PostController {
     }
     //포스트 수정
     @PutMapping(value = "/post")
-    public ResponseEntity<String> changePost(PostForm form){
-        Post post = postService.findPost(form.getId());
+    public ResponseEntity<String> changePost(SavePostRequestDTO postReqDTO){
+        Post post = postService.findPost(postReqDTO.getId());
         if (post==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found.");
         }
-        else if(postService.findPostByTitleMemberId(form.getMemberId(), form.getTitle())!=null){
+        else if(postService.findPostByTitleMemberId(postReqDTO.getMemberId(), postReqDTO.getTitle())!=null){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Title already exsist");
         }
-        post.setTitle(form.getTitle());
-        post.setContent(form.getContent());
+        post.setTitle(postReqDTO.getTitle());
+        post.setContent(postReqDTO.getContent());
         boolean check = postService.changePost(post);
         if(check){
             return ResponseEntity.ok("Update Success.");
