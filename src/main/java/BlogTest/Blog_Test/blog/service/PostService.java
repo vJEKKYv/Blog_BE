@@ -2,15 +2,14 @@ package BlogTest.Blog_Test.blog.service;
 
 import BlogTest.Blog_Test.blog.domain.Post;
 import BlogTest.Blog_Test.blog.repository.PostRepository;
-import BlogTest.Blog_Test.member.domain.Member;
 import BlogTest.Blog_Test.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -22,12 +21,18 @@ public class PostService {
         this.memberRepository = memberRepository;
     }
     //포스트 작성
-    public Long create (Post post){
+    public Post create (Post post){
         boolean check = validateDuplicatePost(post);
         if(check){
-            postRepository.save(post);
-            return post.getId();
-        }else   return (long)-1;
+            try {
+                postRepository.save(post);
+            } catch (DataIntegrityViolationException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "데이터 무결성 오류", e);
+            } catch (Exception e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류 발생", e);
+            }
+            return post;
+        }else   return null;
     }
     //중복 확인
     boolean validateDuplicatePost(Post post) {

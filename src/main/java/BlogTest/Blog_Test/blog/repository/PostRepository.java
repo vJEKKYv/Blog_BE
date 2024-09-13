@@ -9,6 +9,5 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByTitle(String title);
-    List<Post> findByMemberId(Long id);
-
+    List<Post> findByMemberId(Long memberId);
 }
