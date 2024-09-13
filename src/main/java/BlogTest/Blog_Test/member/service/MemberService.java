@@ -19,12 +19,12 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
     //회원가입
-    public Long join (Member member){
+    public Member join (Member member){
         boolean check = validateDuplicateMember(member); //중복 회원 검증
         if (check){
             memberRepository.save(member);
-            return member.getId();
-        }else   return (long)-1;
+            return member;
+        }else   return null;
     }
     //중복 확인
     boolean validateDuplicateMember(Member member) {

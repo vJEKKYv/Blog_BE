@@ -2,12 +2,11 @@ package BlogTest.Blog_Test.member.controller;
 
 import BlogTest.Blog_Test.member.domain.Member;
 import BlogTest.Blog_Test.member.domain.dto.SaveMemberRequestDTO;
+import BlogTest.Blog_Test.member.domain.dto.SaveMemberResponseDTO;
 import BlogTest.Blog_Test.member.service.MemberService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -26,7 +25,7 @@ public class MemberController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(SaveMemberRequestDTO memberReqDTO) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody SaveMemberRequestDTO memberReqDTO) {
         Member member = memberService.login(memberReqDTO.getName(), memberReqDTO.getPassword());
 
         Map<String, Object> requestMap = new HashMap<>();
@@ -39,74 +38,89 @@ public class MemberController {
 
     //회원가입
     @PostMapping(value = "/member/new")
-    public ResponseEntity<String> create(SaveMemberRequestDTO memberReqDTO) {
+    public ResponseEntity<Map<String, Object>> create(@RequestBody SaveMemberRequestDTO memberRequestDTO) {
         Member member = new Member();
-        member.setName(memberReqDTO.getName());
-        member.setPassword(memberReqDTO.getPassword());
-        long id = memberService.join(member);
-        if(id == -1){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Name already exsist");
-        }
-        else {
-            return ResponseEntity.ok("id: "+ id +  "\t Join Success.");
-        }
+        member.setName(memberRequestDTO.getName());
+        member.setPassword(memberRequestDTO.getPassword());
+        member = memberService.join(member);
+
+        SaveMemberResponseDTO memberResponseDTO = new SaveMemberResponseDTO();
+        memberResponseDTO.setName(member.getName());
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", member != null);
+        requestMap.put("message", member != null ? "회원가입 성공" : "회원가입 실패");
+        requestMap.put("userInfo", memberResponseDTO);
+
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
     }
+
     //맴버 전체 조회
     @GetMapping(value = "/member/all")
-    public List<Member> list() {
+    public ResponseEntity<Map<String, Object>> list() {
         List<Member> members = memberService.findMembers();
-        return members;
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", members != null);
+        requestMap.put("message", members != null ? "조회 성공" : "조회 실패");
+        requestMap.put("userInfo", members);
+
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
     }
-    /** 없어도 됨.
-    //맴버 이름 조회
-    @GetMapping(value = "/member/name")
-    public Member findMemberByName(@RequestParam("name") String name) {
-        Member member = memberService.findByName(name);
-        if (member != null){
-            return member;
-        }else {
-            throw new NoSuchElementException("No member found with name: " + name);
-        }
-    }
-    **/
+
     //맴버 id 조회
     @GetMapping(value = "/member/id")
-    public Member findMemberById(@RequestParam("id") Long id) {
+    public ResponseEntity<Map<String, Object>> findMemberById(@RequestParam("id") Long id) {
         Member member = memberService.findOne(id);
-        if(member == null){
-            throw new NoSuchElementException("No member found with id: " + id);
-        }
-        return member;
+
+        SaveMemberResponseDTO memberResponseDTO = new SaveMemberResponseDTO();
+        memberResponseDTO.setId(member.getId());
+        memberResponseDTO.setName(member.getName());
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", member != null);
+        requestMap.put("message", member != null ? "조회 성공" : "조회 실패");
+        requestMap.put("userInfo", memberResponseDTO);
+
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
     }
+
     //맴버 삭제
     @DeleteMapping(value = "/member")
-    public ResponseEntity<String> deleteMemberByName(@RequestParam("name") String name) {
+    public ResponseEntity<Map<String, Object>> deleteMemberByName(@RequestParam("name") String name) {
         boolean check = memberService.deleteByName(name);
-        if(check){
-            return ResponseEntity.ok("Delete Success.");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found.");
-        }
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", check);
+        requestMap.put("message", check ? "삭제 성공" : "삭제 실패");
+
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
     }
+
     //맴버 정보 변경
     @PutMapping(value = "/member")
-    public ResponseEntity<String> changeMember(MemberForm form) {
-        Member member = memberService.findMember(form.getId());
-        if (member == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Member not found.");
+    public ResponseEntity<Map<String, Object>> changeMember(@RequestBody SaveMemberRequestDTO memberRequestDTO) {
+        Member member = memberService.findMember(memberRequestDTO.getId());
+
+        member.setName(memberRequestDTO.getName());
+        member.setPassword(memberRequestDTO.getPassword());
+        if (member== null){
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("success", false);
+            requestMap.put("message", "member 조회 실패");
+            return ResponseEntity.status(HttpStatus.OK).body(requestMap);
         }
-        else if(memberService.findByName(form.getName())!=null){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Name already exsist");
-        }
-        member.setName(form.getName());
-        member.setPassword(form.getPassword());
         boolean check = memberService.changeMemberInfo(member);
-        if(check){
-            return ResponseEntity.ok("Update Success.");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Update failed.");
-        }
+
+        SaveMemberResponseDTO memberResponseDTO = new SaveMemberResponseDTO();
+        memberResponseDTO.setId(member.getId());
+        memberResponseDTO.setName(member.getName());
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", check);
+        requestMap.put("message", check ? "변경 성공" : "변경 실패");
+        requestMap.put("userInfo", memberResponseDTO);
+
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
     }
 }
